@@ -1,0 +1,135 @@
+﻿@model ProfileInfo
+@{
+    ViewBag.Title = "Home Page";
+    Layout = null;
+}
+
+@{
+    <!DOCTYPE html>
+    <html>
+
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width">
+        <link href='http://fonts.googleapis.com/css?family=Roboto+Slab:400,700,300|Roboto:400,500,300italic,300|Damion' rel='stylesheet' type='text/css'>
+        <link href="~/Content/bootstrap.css" type="text/css" rel="stylesheet" />
+        <link href="~/Content/bootstrap.min.css" type="text/css" rel="stylesheet" />
+        <link href="~/Content/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+        <link href="~/Content/main.css" rel="stylesheet" type="text/css" />
+        <link href="~/Content/bootstrap-social-gh-pages/bootstrap-social.css" rel="stylesheet" type="text/css" />
+        <script src="~/Scripts/jquery.min.js"></script>
+        <script src="~/Scripts/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+            </div>
+            <div class="row breadcrumb maindiv">
+                <div class="col-md-1"></div>
+                <div class="col-md-8">
+
+                    <div class="row">
+                        <h4>Social Media Filler</h4>
+                    </div>
+                    <div class="row resp">
+                        @if (!Model.IsSuccess && !string.IsNullOrEmpty(Model.ErrorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                <strong>Error!</strong>@Model.ErrorMessage
+                            </div>
+                        }
+                        <div class="row">
+                            <div class="row">
+                                <h2 class="loginas">LOG IN AS</h2>
+                            </div>
+                            <div class="row socialbtn">
+
+                                <a class="btn btn-social btn-facebook" href="@Url.Action("Facebook","Home")">
+                                    <span class="fa fa-facebook"></span>Facebook
+                                </a>
+                                <a class="btn btn-social btn-twitter" href="@Url.Action("Twitter", "Home")">
+                                    <span class="fa fa-twitter"></span>Twitter
+                                </a>
+                                <a class="btn btn-social btn-linkedin" href="@Url.Action("Linkedin","Home")">
+                                    <span class="fa fa-linkedin"></span>Linkedin
+                                </a>
+                                <a class="btn btn-social btn-instagram"  href="@Url.Action("Instagram","Home")">
+                                    <span class="fa fa-instagram"></span>Instagram
+                                </a>
+                                <a class="btn btn-social btn-pintrest" onclick="PintrestProgress();">
+                                    <span class="fa fa-pinterest"></span>Pintrest
+                                </a>
+                                <a class="btn btn-social btn-google" href="@Url.Action("GooglePlusExternalLogin","Home", new{ provider="GooglePlus" })" )">
+                                    <span class="fa fa-google-plus"></span>Google+
+                                </a>
+                            </div>
+                            <div class="row">
+                                <h2 class="profileinfo">PROFILE INFO</h2>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="row">
+                                        @if (Model.ProfilePicture == null)
+                                        {
+                                            <center>
+                                                <img src="~/Content/Images/images.jpg" style="max-height:150px;max-width:150px;" />
+                                            </center>
+                                        }
+                                        <center>
+                                            <img src="@Model.ProfilePicture" style="max-height:150px;max-width:150px;" />
+                                        </center>
+                                    </div>
+                                    <div class="row col-md-12" style="margin-top:5px">
+                                        <span><strong>Profile URL</strong></span><a href="@Model.ProfileURL" target="_blank"> <strong>Visit Your Profile</strong></a>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="row rightside">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th>Frist Name</th>
+                                                    <th>Last Name</th>
+                                                </tr>
+                                                <tr>
+                                                    <td><input type="text" class="form-control" disabled value="@Model.FirstName" /></td>
+                                                    <td><input type="text" class="form-control" disabled value="@Model.LastName" /></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="row rightside">
+                                        <table>
+                                            <tbody>
+                                                <tr>
+                                                    <th>Phone</th>
+                                                    <th>Email</th>
+                                                </tr>
+                                                <tr>
+                                                    <td><input type="text" class="form-control" disabled value="@Model.Phone" /></td>
+                                                    <td><input type="text" class="form-control" disabled value="@Model.Email" /></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3"></div>
+                </div>
+            </div>
+        </div>
+        <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    </body>
+</html>
+}
+@*temp*@
+<script type="text/javascript">
+    function PintrestProgress() {
+        alert("Pintrest required https URL for request.");
+        return false;
+    }
+</script>
