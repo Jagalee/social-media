@@ -1,6 +1,5 @@
 ﻿using DotNetOpenAuth.AspNet;
 using InstaSharp;
-using InstaSharp.Models.Responses;
 using Microsoft.Web.WebPages.OAuth;
 using System;
 using System.Collections.Generic;
@@ -12,20 +11,22 @@ namespace SocialMediaLogin.Web.Controllers
 {
     public class HomeController : Controller
     {
+        #region Private
+
+        private FacebookUtility fbUtility = new FacebookUtility();
+        private LinkedinUtility linkedinUtility = new LinkedinUtility();
+        private TwitterUtility twitterUtility = new TwitterUtility();
+        private PinterestUtility pinterestLogin = new PinterestUtility();
+        private InstagramConfig instagramConfig = new InstagramConfig(WebConfigurationManagement.InstagramClientID, WebConfigurationManagement.InstagramClientSecret, WebConfigurationManagement.InstagramRedirect_uri, "");
+
+        #endregion Private
 
         /// <summary>
         /// Index method
         /// </summary>
         /// <returns></returns>
-        public ActionResult Index()
+        public ActionResult Index(ProfileInfo profileInfo)
         {
-            var profileInfo = new ProfileInfo();
-
-            if (Session["SocialMediaProfileInfo"] != null)
-            {
-                profileInfo = (ProfileInfo)Session["SocialMediaProfileInfo"];
-            }
-
             return View(profileInfo);
         }
 
@@ -33,7 +34,6 @@ namespace SocialMediaLogin.Web.Controllers
 
         public ActionResult Facebook()
         {
-            var fbUtility = new FacebookUtility();
             return Redirect(fbUtility.GetLogin());
         }
 
@@ -42,9 +42,7 @@ namespace SocialMediaLogin.Web.Controllers
             ProfileInfo profileInfo = new ProfileInfo();
             if (!string.IsNullOrEmpty(code))
             {
-                var fbUtility = new FacebookUtility();
                 profileInfo = fbUtility.GetUserInfo(code);
-                Session["SocialMediaProfileInfo"] = profileInfo;
             }
             else
             {
@@ -52,7 +50,7 @@ namespace SocialMediaLogin.Web.Controllers
                 profileInfo.ErrorMessage = "This app is still in development mode, and you don't have access to it. Switch to a registered test user or ask an app admin for permissions";
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Home", profileInfo);
         }
 
         #endregion Facebook
@@ -61,8 +59,7 @@ namespace SocialMediaLogin.Web.Controllers
 
         public ActionResult Linkedin()
         {
-            LinkedinUtility ln = new LinkedinUtility();
-            string url = ln.GetAuthorizationUrl();
+            string url = linkedinUtility.GetAuthorizationUrl();
             return new RedirectResult(url);
         }
 
@@ -71,17 +68,14 @@ namespace SocialMediaLogin.Web.Controllers
             ProfileInfo profileInfo = new ProfileInfo();
             if (!string.IsNullOrEmpty(code) || string.IsNullOrEmpty(code))
             {
-                var lnUtility = new LinkedinUtility();
-                profileInfo = lnUtility.GetUserInfo(code, state);
-                Session["SocialMediaProfileInfo"] = profileInfo;
+                profileInfo = linkedinUtility.GetUserInfo(code, state);
             }
             else
             {
                 profileInfo.IsSuccess = false;
                 profileInfo.ErrorMessage = "This app is still in development mode, and you don't have access to it. Switch to a registered test user or ask an app admin for permissions";
             }
-
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Home", profileInfo);
         }
 
         #endregion Linkedin
@@ -90,7 +84,6 @@ namespace SocialMediaLogin.Web.Controllers
 
         public ActionResult Twitter()
         {
-            var twitterUtility = new TwitterUtility();
             return Redirect(twitterUtility.GetAuthorizationUrl());
         }
 
@@ -99,9 +92,7 @@ namespace SocialMediaLogin.Web.Controllers
             ProfileInfo profileInfo = new ProfileInfo();
             if (!string.IsNullOrEmpty(oauth_token) || !string.IsNullOrEmpty(oauth_verifier))
             {
-                var twitterUtility = new TwitterUtility();
                 profileInfo = twitterUtility.GetUserInfo(oauth_token, oauth_verifier);
-                Session["SocialMediaProfileInfo"] = profileInfo;
             }
             else
             {
@@ -109,10 +100,10 @@ namespace SocialMediaLogin.Web.Controllers
                 profileInfo.ErrorMessage = "This app is still in development mode, and you don't have access to it. Switch to a registered test user or ask an app admin for permissions";
             }
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Home", profileInfo);
         }
 
-        #endregion twitter
+        #endregion Twitter
 
         #region GooglePlus
 
@@ -143,7 +134,6 @@ namespace SocialMediaLogin.Web.Controllers
 
                 foreach (var item in list)
                 {
-
                     if (string.Compare(item.Key, "given_name", StringComparison.CurrentCultureIgnoreCase) == 0)
                     {
                         profileInfo.FirstName = item.Value.ToString();
@@ -168,21 +158,16 @@ namespace SocialMediaLogin.Web.Controllers
                     {
                         profileInfo.ProfileURL = item.Value.ToString();
                     }
-
                 }
 
                 profileInfo.IsSuccess = true;
-                Session["SocialMediaProfileInfo"] = profileInfo;
-
-                return RedirectToAction("Index", "Home");
             }
             catch (Exception e)
             {
                 profileInfo.IsSuccess = false;
                 profileInfo.ErrorMessage = e.Message;
-
-                return RedirectToAction("Index", "Home");
             }
+            return RedirectToAction("Index", "Home", profileInfo);
         }
 
         internal class ExternalLoginResult : ActionResult
@@ -209,7 +194,6 @@ namespace SocialMediaLogin.Web.Controllers
         [HttpGet]
         public ActionResult Pinterest()
         {
-            var pinterestLogin = new PinterestUtility();
             return Redirect(pinterestLogin.GetAuthorizationLink());
         }
 
@@ -219,34 +203,23 @@ namespace SocialMediaLogin.Web.Controllers
             ProfileInfo profileInfo = new ProfileInfo();
             if (!string.IsNullOrEmpty(code))
             {
-                var pinterestLogin = new PinterestUtility();
                 profileInfo = pinterestLogin.GetUserData(pinterestLogin.GetAccessToken(code));
-                Session["SocialMediaProfileInfo"] = profileInfo;
             }
             else
             {
                 profileInfo.IsSuccess = false;
                 profileInfo.ErrorMessage = "This app is still in development mode, and you don't have access to it. Switch to a registered test user or ask an app admin for permissions";
             }
-
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Home", profileInfo);
         }
 
         #endregion Pinterest
 
         #region Instragram
 
-        private InstagramConfig instagramConfig = new InstagramConfig(WebConfigurationManagement.InstagramClientID, WebConfigurationManagement.InstagramClientSecret, WebConfigurationManagement.InstagramRedirect_uri, "");
-
-
-
         public ActionResult Instagram()
         {
-            return RedirectToAction("InstgramLogin");
-        }
-
-        public ActionResult InstgramLogin()
-        {
+            string a = string.Empty;
             var scopes = new List<OAuth.Scope>();
             scopes.Add(InstaSharp.OAuth.Scope.Basic);
             scopes.Add(InstaSharp.OAuth.Scope.Public_Content);
@@ -259,28 +232,35 @@ namespace SocialMediaLogin.Web.Controllers
             var userProfilinfo = new ProfileInfo();
             if (!string.IsNullOrEmpty(code))
             {
-                var auth = new OAuth(instagramConfig);
-                var oauthResponse = await auth.RequestToken(code);
-                string[] userName = oauthResponse.User.FullName.Split(' ');
-                userProfilinfo.FirstName = userName[0];
-                if (userName.Count() > 1)
+                try
                 {
-                    userProfilinfo.LastName = userName[1];
-                }
+                    var auth = new OAuth(instagramConfig);
+                    var oauthResponse = await auth.RequestToken(code);
+                    string[] userName = oauthResponse.User.FullName.Split(' ');
+                    userProfilinfo.FirstName = userName[0];
+                    if (userName.Count() > 1)
+                    {
+                        userProfilinfo.LastName = userName[1];
+                    }
 
-                userProfilinfo.ProfilePicture = oauthResponse.User.ProfilePicture;
-                userProfilinfo.ProfileURL = "https://www.instagram.com/" + oauthResponse.User.Username;
-                userProfilinfo.IsSuccess = true;
-                Session["SocialMediaProfileInfo"] = userProfilinfo;
+                    userProfilinfo.ProfilePicture = oauthResponse.User.ProfilePicture;
+                    userProfilinfo.ProfileURL = "https://www.instagram.com/" + oauthResponse.User.Username;
+                    userProfilinfo.IsSuccess = true;
+                }
+                catch (Exception ex)
+                {
+                    userProfilinfo.IsSuccess = false;
+                    userProfilinfo.ErrorMessage = ex.Message;
+                }
             }
             else
             {
                 userProfilinfo.IsSuccess = false;
                 userProfilinfo.ErrorMessage = "This app is still in development mode, and you don't have access to it. Switch to a registered test user or ask an app admin for permissions";
             }
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Home", userProfilinfo);
         }
 
-        #endregion
+        #endregion Instragram
     }
 }
